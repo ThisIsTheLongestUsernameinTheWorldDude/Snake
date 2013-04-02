@@ -4,13 +4,24 @@
 (require 2htdp/image)
 (require 2htdp/universe)
 (define SCALE 10)
-(define SCENE  (place-image (square 400 "solid" "black") 204 204 (place-image (square 410 "solid" "red") 204 204 (empty-scene 408 408))))
-(define SEGMENT (circle 10 "solid" "red"))
+(define SCENE  (place-image (square 400 "solid" "black") 0 0 (empty-scene 400 400))))
+(define SEGMENT (circle 5 "solid" "red"))
 (define FOOD (circle 10 "solid" "blue"))
 (define-struct world (worm food score))
 (define-struct worm (head segments))
 (define-struct head (posn dir))
-(define-struct segment (pos id))
+(define-struct segment (posn id))
+
+(define (sub5 x)
+  (- x 5))
+
+(define (add5 x)
+  (+ x 5))
+
+(define (add-to-list l x)
+  (cond
+    [(empty? l) (cons x empty)]
+    [else (cons (first l) (add-to-list (rest l) x))]))
 
 (define (controller w cmd)
   (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
@@ -24,5 +35,31 @@
       [(key=? cmd "a") (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) "food" "score")]
       [(key=? cmd "s") (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) "food" "score")]
       [(key=? cmd "d") (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) "food" "score")])))
+
+(define (move w)
+  (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
+         [y (posn-y (head-posn (worm-head (world-worm w))))]
+         [dir (head-dir (worm-head (world-worm w)))]
+         [head (worm-head (world-worm w))]
+         [worm (world-worm w)]
+         )
+    (cond
+      [(string=? dir "u") (make-world (make-worm (make-head (make-posn x  (sub5 y))  "u") (worm-segments worm)) "food" "score")]
+      [(string=? dir "l") (make-world (make-worm (make-head (make-posn  (sub5 x) y) "l") (worm-segments worm)) "food" "score")]
+      [(string=? dir "d") (make-world (make-worm (make-head (make-posn  x  (add5 y)) "d") (worm-segments worm)) "food" "score")]
+      [(string=? dir "r") (make-world (make-worm (make-head (make-posn  (add5 x) y) "r") (worm-segments worm)) "food" "score")])))
+
+(define (render w)
+  (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
+         [y (posn-y (head-posn (worm-head (world-worm w))))]
+         [dir (head-dir (worm-head (world-worm w)))]
+         [head (worm-head (world-worm w))]
+         [worm (world-worm w)]
+         ) (place-image SEGMENT x y SCENE)))
+
+(big-bang (move (make-world (make-worm (make-head (make-posn 205 205) "u") "segments") "food" "score"))
+          (on-key controller)
+          (on-tick move)
+          (to-draw render))
 
 
