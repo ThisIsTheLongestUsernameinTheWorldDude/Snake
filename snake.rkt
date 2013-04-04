@@ -1,6 +1,15 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-intermediate-reader.ss" "lang")((modname snake) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+(define (move-segments l w)
+    
+    (cond
+      [(empty? l) w]
+      [else (cond
+              [(first l)
+      [(empty? w) (move-segments (rest l) (make-segment (segment-posn (get-segment l (sub1 (segment-id (first l))))) (segment-id (first l))))]
+      [else (move-segments (rest l) (add-to-list w (make-segment (segment-posn (get-segment l (sub1 (segment-id (first l))))) (segment-id (first l)))))]))
+    
 (require 2htdp/image)
 (require 2htdp/universe)
 (define SCALE 10)
@@ -35,6 +44,11 @@
       [(key=? cmd "a") (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) "food" "score")]
       [(key=? cmd "s") (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) "food" "score")]
       [(key=? cmd "d") (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) "food" "score")])))
+(define (get-segment l id)
+  (cond
+    [(empty? l) "error"]
+    [(= (segment-id (first l)) id) (first l)]
+    [else (get-segment (rest l)id)]))
 
 (define (move w)
   (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
