@@ -1,19 +1,14 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-intermediate-reader.ss" "lang")((modname snake) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
-(define (move-segments l w)
+
     
-    (cond
-      [(empty? l) w]
-      [else (cond
-              [(first l)
-      [(empty? w) (move-segments (rest l) (make-segment (segment-posn (get-segment l (sub1 (segment-id (first l))))) (segment-id (first l))))]
-      [else (move-segments (rest l) (add-to-list w (make-segment (segment-posn (get-segment l (sub1 (segment-id (first l))))) (segment-id (first l)))))]))
+   
     
 (require 2htdp/image)
 (require 2htdp/universe)
 (define SCALE 10)
-(define SCENE  (place-image (square 400 "solid" "black") 0 0 (empty-scene 400 400))))
+(define SCENE  (place-image (square 800 "solid" "black") 0 0 (empty-scene 400 400)))
 (define SEGMENT (circle 5 "solid" "red"))
 (define FOOD (circle 10 "solid" "blue"))
 (define-struct world (worm food score))
@@ -43,7 +38,8 @@
       [(key=? cmd "w") (make-world (make-worm (make-head (head-posn head) "u") (worm-segments worm)) "food" "score")]
       [(key=? cmd "a") (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) "food" "score")]
       [(key=? cmd "s") (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) "food" "score")]
-      [(key=? cmd "d") (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) "food" "score")])))
+      [(key=? cmd "d") (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) "food" "score")]
+      [else w])))
 (define (get-segment l id)
   (cond
     [(empty? l) "error"]
