@@ -15,11 +15,13 @@
     [(= (segment-id (first l)) id) (first l)]
     [else (get-segment (rest l)id)]))
 
-(define (move-segments l w) 
+(define (move-worm l)
+  (move-segments l empty l))
+(define (move-segments l w stor) 
 (cond
       [(empty? l) w]
-      [(= (segment-id (first l)) 1) (move-segments (rest l)w)]
+      [(= (segment-id (first l)) 1) (move-segments (rest l)w stor)]
       [else (cond
-      [(empty? w) (move-segments (rest l) (make-segment (segment-posn (get-segment l (sub1 (segment-id (first l))))) (segment-id (first l))))]
-      [else (move-segments (rest l) (add-to-list w (make-segment (segment-posn (get-segment l (sub1 (segment-id (first l))))) (segment-id (first l)))))])]))
-(move-segments (cons (make-segment "a" 1) (cons (make-segment "b" 2) (cons (make-segment "c" 3) (cons (make-segment "d" 4) empty)))) empty)
+      [(empty? w) (move-segments (rest l) (cons (make-segment (segment-posn (get-segment stor (sub1 (segment-id (first l))))) (segment-id (first l)) )empty)stor)]
+      [else (move-segments (rest l) (add-to-list w (make-segment (segment-posn (get-segment stor (sub1 (segment-id (first l))))) (segment-id (first l))))stor)])]))
+(move-worm (cons (make-segment "a" 1) (cons (make-segment "b" 2) (cons (make-segment "c" 3) (cons (make-segment "d" 4) empty)))))
