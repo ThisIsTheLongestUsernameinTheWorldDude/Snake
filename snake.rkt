@@ -84,10 +84,21 @@
          [head (worm-head (world-worm w))]
          [worm (world-worm w)])
          (place-image SEGMENT x y (render-segments (worm-segments (world-worm w))) )))
+(define (stop w)
+   (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
+         [y (posn-y (head-posn (worm-head (world-worm w))))]
+         )
+     (cond
+      [(>= x 800) #t]
+      [(>= y 800) #t]
+       [(<= x 0) #t]
+      [(<= y 0) #t]
+       [else false])))
 
 (big-bang (move (make-world (make-worm (make-head (make-posn 205 205) "u") (cons (make-segment (make-posn 205 200)  1) (cons (make-segment (make-posn 205 195) 2) (cons (make-segment (make-posn 205 190) 3) (cons (make-segment (make-posn 205 185) 4) empty))))) "food" "score"))
           (on-key controller)
           (on-tick move)
-          (to-draw render))
+          (to-draw render)
+          (stop-when stop))
 
 
