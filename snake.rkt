@@ -15,7 +15,7 @@
 (define-struct worm (head segments))
 (define-struct head (posn dir))
 (define-struct segment (posn id))
-
+;helper functions
 (define (sub10 x)
   (- x 10))
 
@@ -31,6 +31,12 @@
     [(empty? l) "error"]
     [(= (segment-id (first l)) id) (first l)]
     [else (get-segment (rest l)id)]))
+(define (posn=? a b)
+  (cond
+    [(and (= (posn-x a) (posn-x b)) (= (posn-y a) (posn-y b))) #t]
+    [else #f]))
+
+;controlling functions
 
 (define (move-worm l)
   (cons (make-segment (head-posn (worm-head (world-worm l))) 1)(move-segments (worm-segments (world-worm l)) empty (worm-segments (world-worm l)))))
@@ -50,10 +56,10 @@
          [worm (world-worm w)]
          )
     (cond
-      [(key=? cmd "w") (make-world (make-worm (make-head (head-posn head) "u") (worm-segments worm)) "food" "score")]
-      [(key=? cmd "a") (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) "food" "score")]
-      [(key=? cmd "s") (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) "food" "score")]
-      [(key=? cmd "d") (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) "food" "score")]
+      [(and (key=? cmd "w") (false? (string=? dir "d"))) (make-world (make-worm (make-head (head-posn head) "u") (worm-segments worm)) "food" "score")]
+      [(and (key=? cmd "a") (false? (string=? dir "r"))) (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) "food" "score")]
+      [(and (key=? cmd "s") (false? (string=? dir "u"))) (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) "food" "score")]
+      [(and (key=? cmd "d") (false? (string=? dir "l"))) (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) "food" "score")]
       [else w])))
 
 
@@ -85,6 +91,10 @@
          [worm (world-worm w)])
          (place-image SEGMENT x y (render-segments (worm-segments (world-worm w))) )))
 (define (stop w)
+  (cond
+    [(or (wall-collide w) (segment-collide (worm-segments (world-worm w)) (worm-head (world-worm w)))) #t]
+    [else #f]))
+(define (wall-collide w)
    (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
          [y (posn-y (head-posn (worm-head (world-worm w))))]
          )
@@ -94,8 +104,14 @@
        [(<= x 0) #t]
       [(<= y 0) #t]
        [else false])))
+(define (segment-collide l head)
+  
+  (cond
+    [(empty? l) #f]
+    [(posn=? (segment-posn (first l)) (head-posn head)) #t]
+    [else (segment-collide (rest l)head)]))
 
-(big-bang (move (make-world (make-worm (make-head (make-posn 205 205) "u") (cons (make-segment (make-posn 205 200)  1) (cons (make-segment (make-posn 205 195) 2) (cons (make-segment (make-posn 205 190) 3) (cons (make-segment (make-posn 205 185) 4) empty))))) "food" "score"))
+(big-bang (move (make-world (make-worm (make-head (make-posn 205 205) "d") (cons (make-segment (make-posn 205 195)  1) (cons (make-segment (make-posn 205 185) 2) (cons (make-segment (make-posn 205 175) 3) (cons (make-segment (make-posn 205 165) 4) (cons (make-segment (make-posn 205 155) 5) (cons (make-segment (make-posn 205 145) 6) (cons (make-segment (make-posn 205 135) 7) (cons (make-segment (make-posn 205 125) 8) (cons (make-segment (make-posn 205 115) 9) (cons (make-segment (make-posn 205 95) 10) (cons (make-segment (make-posn 205 85) 11) (cons (make-segment (make-posn 205 75) 12) empty))))))))))))) "food" "score"))
           (on-key controller)
           (on-tick move)
           (to-draw render)
