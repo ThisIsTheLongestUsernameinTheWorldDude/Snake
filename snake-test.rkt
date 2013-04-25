@@ -36,6 +36,10 @@
   (cond
     [(and (= (posn-x a) (posn-x b)) (= (posn-y a) (posn-y b))) #t]
     [else #f]))
+(define (last-segment l)
+  (cond
+    [(empty? (rest l)) (first l)]
+    [else (last-segment (rest l))]))
 
 ;controlling functions
 
@@ -75,12 +79,13 @@
          [head (worm-head (world-worm w))]
          [worm (world-worm w)]
          [segments (worm-segments (world-worm w))]
+         [food (world-food w)]
          )
     (cond
-      [(and (posn=? head-posn food-posn)(string=? dir "u")) (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") (move-worm w)) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
-      [(and (posn=? head-posn food-posn)(string=? dir "l")) (make-world (make-worm (make-head (make-posn  (sub10 x) y) "l") (move-worm w)) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
-      [(and (posn=? head-posn food-posn)(string=? dir "d")) (make-world (make-worm (make-head (make-posn  x  (add10 y)) "d") (move-worm w)) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
-      [(and (posn=? head-posn food-posn)(string=? dir "r")) (make-world (make-worm (make-head (make-posn  (add10 x) y) "r") (move-worm w)) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
+      [(and (posn=? head-posn food-posn)(string=? dir "u")) (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
+      [(and (posn=? head-posn food-posn)(string=? dir "l")) (make-world (make-worm (make-head (make-posn  (sub10 x) y) "l") (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
+      [(and (posn=? head-posn food-posn)(string=? dir "d")) (make-world (make-worm (make-head (make-posn  x  (add10 y)) "d") (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) ))))(make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score"]
+      [(and (posn=? head-posn food-posn)(string=? dir "r")) (make-world (make-worm (make-head (make-posn  (add10 x) y) "r") (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) )))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
       [(string=? dir "u") (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") (move-worm w)) food "score")]
       [(string=? dir "l") (make-world (make-worm (make-head (make-posn  (sub10 x) y) "l") (move-worm w)) food "score")]
       [(string=? dir "d") (make-world (make-worm (make-head (make-posn  x  (add10 y)) "d") (move-worm w)) food "score")]
@@ -98,7 +103,7 @@
          [dir (head-dir (worm-head (world-worm w)))]
          [head (worm-head (world-worm w))]
          [worm (world-worm w)])
-         (place-image SEGMENT x y (place-image FOOD (posn-x (food-posn (world-food w))) (posn-y (food-posn (world-food)))(render-segments (worm-segments (world-worm w)))) )))
+         (place-image SEGMENT x y (place-image FOOD (posn-x (food-posn (world-food w))) (posn-y (food-posn (world-food w)))(render-segments (worm-segments (world-worm w)))) )))
 (define (stop w)
   (cond
     [(or (wall-collide w) (segment-collide (worm-segments (world-worm w)) (worm-head (world-worm w)))) #t]
@@ -120,7 +125,7 @@
     [(posn=? (segment-posn (first l)) (head-posn head)) #t]
     [else (segment-collide (rest l)head)]))
 
-(big-bang (move (make-world (make-worm (make-head (make-posn 200 200) "d") (cons (make-segment (make-posn 200 190)  1) (cons (make-segment (make-posn 200 180) 2) (cons (make-segment (make-posn 200 170) 3) (cons (make-segment (make-posn 200 160) 4) (cons (make-segment (make-posn 200 150) 5) (cons (make-segment (make-posn 200 140) 6) (cons (make-segment (make-posn 200 130) 7) (cons (make-segment (make-posn 200 120) 8) (cons (make-segment (make-posn 200 110) 9) (cons (make-segment (make-posn 200 90) 10) (cons (make-segment (make-posn 200 80) 11) (cons (make-segment (make-posn 200 70) 12) empty))))))))))))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score"))
+(big-bang (make-world (make-worm (make-head (make-posn 200 200) "d") (cons (make-segment (make-posn 200 190)  1) (cons (make-segment (make-posn 200 180) 2) (cons (make-segment (make-posn 200 170) 3) (cons (make-segment (make-posn 200 160) 4) (cons (make-segment (make-posn 200 150) 5) (cons (make-segment (make-posn 200 140) 6) (cons (make-segment (make-posn 200 130) 7) (cons (make-segment (make-posn 200 120) 8) (cons (make-segment (make-posn 200 110) 9) (cons (make-segment (make-posn 200 90) 10) (cons (make-segment (make-posn 200 80) 11) (cons (make-segment (make-posn 200 70) 12) empty))))))))))))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")
           (on-key controller)
           (on-tick move)
           (to-draw render)
