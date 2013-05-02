@@ -60,13 +60,14 @@
          [head (worm-head (world-worm w))]
          [worm (world-worm w)]
          [food (world-food w)]
+         [score (world-score w)]
          
          )
     (cond
-      [(and (key=? cmd "w") (false? (string=? dir "d"))) (make-world (make-worm (make-head (head-posn head) "u") (worm-segments worm)) food "score")]
-      [(and (key=? cmd "a") (false? (string=? dir "r"))) (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) food "score")]
-      [(and (key=? cmd "s") (false? (string=? dir "u"))) (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) food "score")]
-      [(and (key=? cmd "d") (false? (string=? dir "l"))) (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) food "score")]
+      [(and (key=? cmd "w") (false? (string=? dir "d"))) (make-world (make-worm (make-head (head-posn head) "u") (worm-segments worm)) food score)]
+      [(and (key=? cmd "a") (false? (string=? dir "r"))) (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) food score)]
+      [(and (key=? cmd "s") (false? (string=? dir "u"))) (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) food score)]
+      [(and (key=? cmd "d") (false? (string=? dir "l"))) (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) food score)]
       [else w])))
 
 
@@ -80,16 +81,29 @@
          [worm (world-worm w)]
          [segments (worm-segments (world-worm w))]
          [food (world-food w)]
+         [score (world-score w)]
          )
     (cond
-      [(and (posn=? head-posn food-posn)(string=? dir "u")) (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
-      [(and (posn=? head-posn food-posn)(string=? dir "l")) (make-world (make-worm (make-head (make-posn  (sub10 x) y) "l") (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
-      [(and (posn=? head-posn food-posn)(string=? dir "d")) (make-world (make-worm (make-head (make-posn  x  (add10 y)) "d") (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) ))))(make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score"]
-      [(and (posn=? head-posn food-posn)(string=? dir "r")) (make-world (make-worm (make-head (make-posn  (add10 x) y) "r") (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) )))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")]
-      [(string=? dir "u") (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") (move-worm w)) food "score")]
-      [(string=? dir "l") (make-world (make-worm (make-head (make-posn  (sub10 x) y) "l") (move-worm w)) food "score")]
-      [(string=? dir "d") (make-world (make-worm (make-head (make-posn  x  (add10 y)) "d") (move-worm w)) food "score")]
-      [(string=? dir "r") (make-world (make-worm (make-head (make-posn  (add10 x) y) "r") (move-worm w)) food "score")])))
+      [(and (posn=? head-posn food-posn)(string=? dir "u")) (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") 
+    (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) 
+     (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) score))) 
+         (make-food (make-posn (* (random 79) 10) (* (+(random 78)1) 10))) (add1 score))]
+      [(and (posn=? head-posn food-posn)(string=? dir "l")) (make-world (make-worm (make-head (make-posn (sub10 x)  y)  "l") 
+        (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) 
+                     (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) score))) 
+                             (make-food (make-posn (* (random 79) 10) (* (+(random 78)1) 10))) (add1 score))]
+      [(and (posn=? head-posn food-posn)(string=? dir "d")) (make-world (make-worm (make-head (make-posn x  (add10 y))  "d") 
+        (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) 
+         (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) score))) 
+             (make-food (make-posn (* (random 79) 10) (* (+(random 78)1) 10))) (add1 score))]
+      [(and (posn=? head-posn food-posn)(string=? dir "r")) (make-world (make-worm (make-head (make-posn (add10 x)  y)  "r") 
+       (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) 
+            (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) score))) 
+                 (make-food (make-posn (* (random 79) 10) (* (+(random 78)1) 10))) (add1 score))]
+      [(string=? dir "u") (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") (move-worm w)) food score)]
+      [(string=? dir "l") (make-world (make-worm (make-head (make-posn  (sub10 x) y) "l") (move-worm w)) food score)]
+      [(string=? dir "d") (make-world (make-worm (make-head (make-posn  x  (add10 y)) "d") (move-worm w)) food score)]
+      [(string=? dir "r") (make-world (make-worm (make-head (make-posn  (add10 x) y) "r") (move-worm w)) food score)])))
 
 
 (define (render-segments l)
@@ -102,7 +116,9 @@
          [y (posn-y (head-posn (worm-head (world-worm w))))]
          [dir (head-dir (worm-head (world-worm w)))]
          [head (worm-head (world-worm w))]
-         [worm (world-worm w)])
+         [worm (world-worm w)]
+         [score (world-score w)])
+    
          (place-image SEGMENT x y (place-image FOOD (posn-x (food-posn (world-food w))) (posn-y (food-posn (world-food w)))(render-segments (worm-segments (world-worm w)))) )))
 (define (stop w)
   (cond
@@ -125,10 +141,24 @@
     [(posn=? (segment-posn (first l)) (head-posn head)) #t]
     [else (segment-collide (rest l)head)]))
 
-(big-bang (make-world (make-worm (make-head (make-posn 200 200) "d") (cons (make-segment (make-posn 200 190)  1) (cons (make-segment (make-posn 200 180) 2) (cons (make-segment (make-posn 200 170) 3) (cons (make-segment (make-posn 200 160) 4) (cons (make-segment (make-posn 200 150) 5) (cons (make-segment (make-posn 200 140) 6) (cons (make-segment (make-posn 200 130) 7) (cons (make-segment (make-posn 200 120) 8) (cons (make-segment (make-posn 200 110) 9) (cons (make-segment (make-posn 200 90) 10) (cons (make-segment (make-posn 200 80) 11) (cons (make-segment (make-posn 200 70) 12) empty))))))))))))) (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) "score")
+(define (lose w)
+  (let* ([score (world-score w)]
+       )
+  (cond
+    [(<= score 10) (place-image (text (string-append "You finished with the FAILTACUALR score of " (number->string score)) 35 "red") 400 400 SCENE)]
+    [(<= score 20) (place-image (text (string-append "You finished with the mediocre score of " (number->string score)) 35 "red") 400 400 SCENE)]
+    [(<= score 30) (place-image (text (string-append "You finished with the decent score of " (number->string score)) 35 "red") 400 400 SCENE)]
+    [(<= score 40) (place-image (text (string-append "You finished with the awesome score of " (number->string score)) 35 "red") 400 400 SCENE)]
+    [(<= score 50) (place-image (text (string-append "You finished with the GODLIKE score of " (number->string score)) 35 "red") 400 400 SCENE)]
+    [else (place-image (text (string-append "You finished with the BEYOND GODLIKE score of" (number->string score)) 48 "red") 400 400 SCENE)])))
+
+(big-bang (make-world (make-worm (make-head (make-posn 200 200) "d") 
+                                 (cons (make-segment (make-posn 200 190)  1) (cons (make-segment (make-posn 200 180) 2) 
+                                    (cons (make-segment (make-posn 200 170) 3) (cons (make-segment (make-posn 200 160) 4)  empty))))) 
+                                         (make-food (make-posn (* (random 79) 10) (* (random 79) 10))) 0)
           (on-key controller)
           (on-tick move)
           (to-draw render)
-          (stop-when stop))
+          (stop-when stop lose))
 
 
