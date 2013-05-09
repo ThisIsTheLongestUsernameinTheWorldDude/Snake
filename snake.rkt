@@ -9,32 +9,60 @@
 (require 2htdp/universe)
 (define SCALE 10)
 (define SCENE  (place-image (square 1600 "solid" "black") 0 0 (empty-scene 800 800)))
-(define SEGMENT (circle 5 "solid" "red"))
 (define FOOD (circle 5 "solid" "blue"))
 (define-struct world (worm food score))
 (define-struct worm (head segments))
 (define-struct head (posn dir))
 (define-struct segment (posn id))
+(define-struct food (posn))
+;check expects are for nubs
+(check-expect (move (make-world (make-worm (make-head (make-posn 200 200) "d") 
+                                 (cons (make-segment (make-posn 200 190)  1) (cons (make-segment (make-posn 200 180) 2) 
+                                    (cons (make-segment (make-posn 200 170) 3) (cons (make-segment (make-posn 200 160) 4)  empty))))) 
+                                         (make-food (make-posn 10 20)) 0)) 
+              (make-world (make-worm (make-head (make-posn 200 210) "d") 
+                                 (cons (make-segment (make-posn 200 200)  1) (cons (make-segment (make-posn 200 190) 2) 
+                                    (cons (make-segment (make-posn 200 180) 3) (cons (make-segment (make-posn 200 170) 4)  empty))))) 
+                                         (make-food (make-posn 10 20)) 0))
+;my use of random numbers means that most check expects wont work
 ;helper functions
+(define (choose-color num)
+  (cond
+    [(= num 0) "red"]
+    [(= num 1) "orange"]
+    [(= num 2) "yellow"]
+    [(= num 3) "green"]
+    [(= num 4) "maroon"]
+    [(= num 5) "indigo"]
+    [(= num 6) "purple"]
+    [(= num 7) "pink"]
+    [(= num 8) "crimson"]
+    [else "white"]))
 (define (sub10 x)
   (- x 10))
 
 (define (add10 x)
   (+ x 10))
-
+;adds item to list
 (define (add-to-list l x)
   (cond
     [(empty? l) (cons x empty)]
     [else (cons (first l) (add-to-list (rest l) x))]))
+;finds a given segment by id number
 (define (get-segment l id)
   (cond
     [(empty? l) "error"]
     [(= (segment-id (first l)) id) (first l)]
     [else (get-segment (rest l)id)]))
+;checks if two posns are =
 (define (posn=? a b)
   (cond
     [(and (= (posn-x a) (posn-x b)) (= (posn-y a) (posn-y b))) #t]
     [else #f]))
+(define (last-segment l)
+  (cond
+    [(empty? (rest l)) (first l)]
+    [else (last-segment (rest l))]))
 
 ;controlling functions
 
@@ -54,42 +82,72 @@
          [dir (head-dir (worm-head (world-worm w)))]
          [head (worm-head (world-worm w))]
          [worm (world-worm w)]
+         [food (world-food w)]
+         [score (world-score w)]
+         
          )
     (cond
-      [(and (key=? cmd "w") (false? (string=? dir "d"))) (make-world (make-worm (make-head (head-posn head) "u") (worm-segments worm)) "food" "score")]
-      [(and (key=? cmd "a") (false? (string=? dir "r"))) (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) "food" "score")]
-      [(and (key=? cmd "s") (false? (string=? dir "u"))) (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) "food" "score")]
-      [(and (key=? cmd "d") (false? (string=? dir "l"))) (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) "food" "score")]
+      [(and (key=? cmd "w") (false? (string=? dir "d"))) (make-world (make-worm (make-head (head-posn head) "u") (worm-segments worm)) food score)]
+      [(and (key=? cmd "a") (false? (string=? dir "r"))) (make-world (make-worm (make-head (head-posn head) "l") (worm-segments worm)) food score)]
+      [(and (key=? cmd "s") (false? (string=? dir "u"))) (make-world (make-worm (make-head (head-posn head) "d") (worm-segments worm)) food score)]
+      [(and (key=? cmd "d") (false? (string=? dir "l"))) (make-world (make-worm (make-head (head-posn head) "r") (worm-segments worm)) food score)]
       [else w])))
-
-
-(define (move w)
+;I can take a hint
+(define(grow-worm w posn)
   (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
          [y (posn-y (head-posn (worm-head (world-worm w))))]
+         [head-posn (head-posn (worm-head (world-worm w)))]
+         [food-posn (food-posn  (world-food w))]
          [dir (head-dir (worm-head (world-worm w)))]
          [head (worm-head (world-worm w))]
          [worm (world-worm w)]
          [segments (worm-segments (world-worm w))]
+         [food (world-food w)]
+         [score (world-score w)]
+         )
+    (make-world (make-worm (make-head posn dir) 
+    (move-worm (make-world (make-worm head (add-to-list segments (make-segment (segment-posn (last-segment segments)) (add1 (segment-id (last-segment segments)))))) 
+     (make-food (make-posn (* (+(random 78)1) 10) (* (+(random 78)1) 10))) score))) 
+         (make-food (make-posn (* (+(random 78)1) 10) (* (+(random 78)1) 10))) (add1 score))))
+
+(define (move w)
+  (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
+         [y (posn-y (head-posn (worm-head (world-worm w))))]
+         [head-posn (head-posn (worm-head (world-worm w)))]
+         [food-posn (food-posn  (world-food w))]
+         [dir (head-dir (worm-head (world-worm w)))]
+         [head (worm-head (world-worm w))]
+         [worm (world-worm w)]
+         [segments (worm-segments (world-worm w))]
+         [food (world-food w)]
+         [score (world-score w)]
          )
     (cond
-      [(string=? dir "u") (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") (move-worm w)) "food" "score")]
-      [(string=? dir "l") (make-world (make-worm (make-head (make-posn  (sub10 x) y) "l") (move-worm w)) "food" "score")]
-      [(string=? dir "d") (make-world (make-worm (make-head (make-posn  x  (add10 y)) "d") (move-worm w)) "food" "score")]
-      [(string=? dir "r") (make-world (make-worm (make-head (make-posn  (add10 x) y) "r") (move-worm w)) "food" "score")])))
+      [(and (posn=? head-posn food-posn)(string=? dir "u")) (grow-worm w (make-posn x  (sub10 y)))] 
+      [(and (posn=? head-posn food-posn)(string=? dir "l")) (grow-worm w (make-posn (sub10 x)  y))]
+      [(and (posn=? head-posn food-posn)(string=? dir "d"))(grow-worm w (make-posn x  (add10 y)))]
+      [(and (posn=? head-posn food-posn)(string=? dir "r")) (grow-worm w (make-posn (add10 x)  y))]
+      [(string=? dir "u") (make-world (make-worm (make-head (make-posn x  (sub10 y))  "u") (move-worm w)) food score)]
+      [(string=? dir "l") (make-world (make-worm (make-head (make-posn  (sub10 x) y) "l") (move-worm w)) food score)]
+      [(string=? dir "d") (make-world (make-worm (make-head (make-posn  x  (add10 y)) "d") (move-worm w)) food score)]
+      [(string=? dir "r") (make-world (make-worm (make-head (make-posn  (add10 x) y) "r") (move-worm w)) food score)])))
 
 
 (define (render-segments l)
   (cond
     [(empty? l) SCENE]
-    [else (place-image SEGMENT (posn-x (segment-posn (first l))) (posn-y (segment-posn (first l))) (render-segments (rest l)))]))
+    [else (place-image (circle 5 "solid" (choose-color (random 8))) (posn-x (segment-posn (first l))) (posn-y (segment-posn (first l))) (render-segments (rest l)))]))
 
 (define (render w)
   (let* ([x (posn-x (head-posn (worm-head (world-worm w))))]
          [y (posn-y (head-posn (worm-head (world-worm w))))]
          [dir (head-dir (worm-head (world-worm w)))]
          [head (worm-head (world-worm w))]
-         [worm (world-worm w)])
-         (place-image SEGMENT x y (render-segments (worm-segments (world-worm w))) )))
+         [worm (world-worm w)]
+         [score (world-score w)])
+    
+         (place-image (circle 5 "solid" (choose-color (random 8))) x y (place-image FOOD (posn-x (food-posn (world-food w))) (posn-y (food-posn (world-food w)))(render-segments (worm-segments (world-worm w)))) )))
+;stop functions
 (define (stop w)
   (cond
     [(or (wall-collide w) (segment-collide (worm-segments (world-worm w)) (worm-head (world-worm w)))) #t]
@@ -111,10 +169,28 @@
     [(posn=? (segment-posn (first l)) (head-posn head)) #t]
     [else (segment-collide (rest l)head)]))
 
-(big-bang (move (make-world (make-worm (make-head (make-posn 205 205) "d") (cons (make-segment (make-posn 205 195)  1) (cons (make-segment (make-posn 205 185) 2) (cons (make-segment (make-posn 205 175) 3) (cons (make-segment (make-posn 205 165) 4) (cons (make-segment (make-posn 205 155) 5) (cons (make-segment (make-posn 205 145) 6) (cons (make-segment (make-posn 205 135) 7) (cons (make-segment (make-posn 205 125) 8) (cons (make-segment (make-posn 205 115) 9) (cons (make-segment (make-posn 205 95) 10) (cons (make-segment (make-posn 205 85) 11) (cons (make-segment (make-posn 205 75) 12) empty))))))))))))) "food" "score"))
+(define (end-msg w adj)
+  (let* ([score (world-score w)]
+       )
+    (place-image (text (string-append "You finished with the " (string-append adj" score of " (number->string score))) 35 "red") 400 400 SCENE)))
+(define (lose w)
+  (let* ([score (world-score w)]
+       )
+  (cond
+    [(<= score 15) (end-msg w "FAILTACULAR")]
+    [(<= score 30) (end-msg w "mediocre")]
+    [(<= score 45) (end-msg w "decent")]
+    [(<= score 60) (end-msg w "awesome")]
+    [(<= score 75) (end-msg w "GODLIKE")]
+    [else (end-msg w "BEYOND GODLIKE")])))
+
+(big-bang (make-world (make-worm (make-head (make-posn 200 200) "d") 
+                                 (cons (make-segment (make-posn 200 190)  1) (cons (make-segment (make-posn 200 180) 2) 
+                                    (cons (make-segment (make-posn 200 170) 3) (cons (make-segment (make-posn 200 160) 4)  empty))))) 
+                                         (make-food (make-posn (* (+(random 78)1) 10) (* (+(random 78)1) 10))) 0)
           (on-key controller)
           (on-tick move)
           (to-draw render)
-          (stop-when stop))
+          (stop-when stop lose))
 
 
